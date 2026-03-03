@@ -34,7 +34,7 @@ DeviceNetworkEvents
 
 ---
 
-### Brute Force Attempts Detection
+### Port Scan Detection
 
 After observing failed connection requests from our suspected host (10.1.0.140) in sequential order. I observed a port scan was taking place due to the sequential order of the ports. Several port scans were being conducted:
 
