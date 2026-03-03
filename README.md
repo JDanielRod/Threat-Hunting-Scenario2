@@ -36,25 +36,22 @@ DeviceNetworkEvents
 
 ### Brute Force Attempts Detection
 
-A few bad actors have been discovered attempting to log into target machine (danscenario1lab)
+After observing failed connection requests from our suspected host (10.1.0.140) in sequential order. I observed a port scan was taking place due to the sequential order of the ports. Several port scans were being conducted:
 
 **Detection Query:**
 
 ```kql
-DeviceLogonEvents
-| where DeviceName == "danscenario1lab"
-| where LogonType has_any("Network", "Interactive","RemoteInteractive","Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize Attempts = count() by ActionType, RemoteIP, DeviceName
-| order by Attempts
+let IPInQuestion = "10.1.0.140";
+DeviceNetworkEvents
+| where ActionType == "ConnectionFailed"
+| where LocalIP == IPInQuestion
+| order by Timestamp desc
 ```
 
 ## Sample Output:
 
-<img width="686" height="276" alt="Scenario1DeviceLogonEventsExpanded" src="https://github.com/user-attachments/assets/71581581-14a9-433c-b42a-65b33819b87b" />
+<img width="1163" height="641" alt="Screenshot 2026-02-27 111034" src="https://github.com/user-attachments/assets/8a922166-3ce6-468c-ba19-d41eb07ded62" />
 
-NOTE: The VM had been running for a limited time up to this point, so the results from the query yielded 3 IPS. If the VM kept running, there would more than likely be more bad actors trying to gain access.
 ---
 
 ## Further Investigation
