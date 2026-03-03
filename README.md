@@ -56,18 +56,21 @@ DeviceNetworkEvents
 
 ## Further Investigation
 
-The 3 IPs that have attempted logins have not been able to gain access.
+We pivoted to the DeviceProcessEvents table to observe if we could find anything suspicious around the time the port scan started. Noticed a powershell script named portscan.ps1 launching at 2026-02-27T18:09:29.6512222Z
+
 
 **Detection Query:**
 ```kql
-let RemoteIPsInQuestion = dynamic(["185.156.73.74", "185.218.138.3", "185..156.73.169"]);
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where RemoteIP has_any(RemoteIPsInQuestion)
+let VMname = "danscenariolab";
+let specificTime = datetime(2026-02-27T18:10:01.3976938Z);
+DeviceProcessEvents
+| where Timestamp between ((specificTime - 10m) .. (specificTime))
+| where DeviceName == VMname
+| order by Timestamp desc
+| project Timestamp, FileName, InitiatingProcessCommandLine
 ```
 ## Sample Output:
-<img width="689" height="365" alt="NoSuccessfulLogin" src="https://github.com/user-attachments/assets/0a025dac-31c6-442f-a203-39adc47e3bd7" />
+
 
 ---
 
