@@ -75,69 +75,36 @@ DeviceProcessEvents
 
 ---
 
-The only successful remote/network logins in the last 7 days for 'dano12go' account (3 total):
+I observed the port scan script was launched by the dano12go account.
 
 **Detection Query:**
-
 ```kql
-DeviceLogonEvents
-| where DeviceName == "danscenario1lab"
-| where LogonType == "Network"
-| where ActionType == "LogonSuccess"
-| summarize count()
-```
-## Sample Output:
-<img width="686" height="252" alt="OnlysuccessfullogonME" src="https://github.com/user-attachments/assets/766913fe-b066-45c6-bec2-83052fa4d073" />
-
-There were 0 failed logons from this account, indicating no brute force attempt taking place for this account. Unlikely this was a 1-time password guess.
-
-**Detecion Query:**
-
-```kql
-DeviceLogonEvents
-| where DeviceName == "danscenario1lab"
-| where LogonType == "Network"
-| where ActionType == "LogonFailed"
-| where AccountName == "dano12go"
-| summarize count()
-```
-## Sample Output:
-<img width="692" height="188" alt="0failedlogons" src="https://github.com/user-attachments/assets/92c00770-ad6c-4825-9349-aeecf4b7581a" />
-
----
-
-We checked successful login IPs for "dano12go" to see if any of them were unusual or from an unexpected location. all were normal. The location for the remote IP in the screenshot is in the area I am at.
-
-```kql
-DeviceLogonEvents
-| where DeviceName == "danscenario1lab"
-| where LogonType == "Network"
-| where ActionType == "LogonSuccess"
-| where AccountName == "dano12go"
-| summarize LoginCount = count() by DeviceName, ActionType, AccountName, RemoteIP
+DeviceProcessEvents
+| where Timestamp between ((specificTime - 10m) .. (specificTime))
+| where DeviceName == VMname
+| order by Timestamp desc
+| project Timestamp, FileName, InitiatingProcessCommandLine, AccountName
 ```
 
 ## Sample Output:
-<img width="685" height="229" alt="SuccessfulLogonCheck" src="https://github.com/user-attachments/assets/e013a47b-0743-41a3-b18f-3d9fd848e9bb" />
+<img width="1168" height="265" alt="Screenshot 2026-02-27 113627" src="https://github.com/user-attachments/assets/fe2940f6-5dce-41fc-ac56-3e6e57b2c338" />
 
 ---
 
-The device exposed to the internet has clear brute force attempts occuring. There is no evidence of any brute force success or unauthorized access from legitimate account "dano12go" 
-
----
-Relevant TTPs(Tactics, Techniques, and Procedures):
+**Relevant TTPs(Tactics, Techniques, and Procedures):**
 
 # 🛡️ MITRE ATT&CK TTPs for Incident Detection
 
-| **TTP ID** | **TTP Name**                      | **Description**                                                                                  | **Detection Relevance**                                                                 |
-|------------|-----------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| T1190      | Exploit Public-Facing Application | System was publicly accessible, making it a potential target for exploitation attempts.          | Helps identify exposed services and potential attack surfaces from internet-facing apps.|
-| T1110      | Brute Force                       | Multiple failed login attempts from external IPs indicate brute-force activity.                  | Detects repeated authentication failures, signaling credential-based attacks.           |
-| T1078      | Valid Accounts (Attempted)        | Adversaries attempted to authenticate using legitimate credentials but were unsuccessful.        | Helps monitor for unauthorized use or attempted abuse of valid credentials.             |
+| **Tactic**        | **TTP ID** | **TTP Name**                         | **Description**                                                                                  | **Detection Relevance**                                                                 |
+|------------------|------------|--------------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| Reconnaissance   | T1046      | Network Service Discovery            | Adversary scans ports/services to identify open ports and available services.                   | Sequential failed connection attempts indicate active port scanning behavior.           |
+| Execution        | T1059.001  | Command and Scripting Interpreter: PowerShell | Use of PowerShell to execute malicious scripts or commands.                                       | Detection of `portscan.ps1` execution confirms scripted reconnaissance activity.        |
+| Initial Access   | T1078      | Valid Accounts                       | Adversary uses legitimate credentials to execute malicious activity.                             | Port scan executed under `dan12go` account indicates potential account misuse.          |
+| Command and Control | T1105   | Ingress Tool Transfer                | Tools/scripts transferred to target system for execution.                                         | Presence of `portscan.ps1` suggests a tool was introduced or staged on the host.        |
+| Lateral Movement | T1021      | Remote Services                      | Use of network connections to interact with other systems.                                        | Repeated connection attempts to multiple hosts/ports may indicate lateral probing.      |
 
 ---
 **📝 Response:**  
 
-   - Harden NSG of VM to allow only RDP from specific endpoints. ( no public internet access)
-   - Enable MFA
+   - Isolate the device on Microsoft Defender for Endpoint
 
