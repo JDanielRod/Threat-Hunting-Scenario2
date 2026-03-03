@@ -28,7 +28,8 @@ DeviceNetworkEvents
 
 ## Sample Output:
 
-<img width="473" height="202" alt="image" src="https://github.com/user-attachments/assets/62e1ba1a-e5fb-4640-9c66-f80254ad409a" />
+<img width="1210" height="516" alt="Screenshot 2026-02-27 110156" src="https://github.com/user-attachments/assets/76aa0459-b2b0-4e20-9e8f-c3228690e900" />
+
 
 
 ---
