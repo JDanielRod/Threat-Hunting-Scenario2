@@ -1,34 +1,34 @@
-# 🔍**Detection of Internet-facing sensitive assets**
+# 🔍**Sudden Network Slowdowns**
 
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/ab796c31-b368-4294-af03-cae6f68f4f3f" />
 
 
 ## Example Scenario:
-During routine maintenance, the security team is tasked with investigating any VMs in the shared services cluster (handling DNS, Domain Services, DHCP, etc.) that have mistakenly been exposed to the public internet.
+The server team has noticed a significant network performance degradation on some of their older devices attached to the network in the 10.0.0.0/16 network. After ruling out external DDoS attacks, the security team suspects something might be going on internally. All traffic originating from within the local network is by default allowed by all hosts. There is also unrestricted use of PowerShell and other applications in the environment.
 
-NOTE: I spun up a VM on Azure, and then onboarded it to Microsoft Defender for Endpoint. This will act as the internet-facing asset for this example.
+NOTE: I spun up a VM on Azure, and then onboarded it to Microsoft Defender for Endpoint. This will act as the suspicious host.
 
 ## Goal:
-Identify any misconfigured VMs and check for potential brute-force login attempts/successes from external sources.
+Identify if someone on network is either downloading large files or doing some kind of port scan against hosts in the network.
 
 ---
 
 ### **Timeline Overview**  
 1. **🔍 Archiving Activity:**  
-   - **Observed Behavior:**  danscenario1lab has been internet-facing for a day or so.
-   
-   - Last Internet facing time: `2025-01-06T19:15:05.9710276Z`
+   - **Observed Behavior:**  danscenario3lab has been found failing several connection requests against itself and other hosts.
   
    - **Detection Query:**
 ```kql
-DeviceInfo
-| where DeviceName == "danscenario1lab"
-| order by Timestamp desc
+DeviceNetworkEvents
+| where DeviceName == "danscenariolab"
+| where ActionType == "ConnectionFailed"
+| summarize ConnectionCount = count() by DeviceName, ActionType, LocalIP
+| order by ConnectionCount
 ```
 
 ## Sample Output:
 
-<img width="647" height="305" alt="image" src="https://github.com/user-attachments/assets/6919b9e0-1af3-4fe2-9477-a5064a0a61ed" />
+<img width="473" height="202" alt="image" src="https://github.com/user-attachments/assets/62e1ba1a-e5fb-4640-9c66-f80254ad409a" />
 
 
 ---
