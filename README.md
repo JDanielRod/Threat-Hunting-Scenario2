@@ -71,6 +71,7 @@ DeviceProcessEvents
 ```
 ## Sample Output:
 
+<img width="1178" height="549" alt="Screenshot 2026-02-27 112108" src="https://github.com/user-attachments/assets/08889665-0409-480c-a84f-2386cb93c3ae" />
 
 ---
 
